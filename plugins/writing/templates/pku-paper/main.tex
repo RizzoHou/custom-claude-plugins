@@ -1,0 +1,189 @@
+% !TEX program = xelatex
+% 北京大学（PKU）学术论文模板
+% 编译：xelatex main.tex; xelatex main.tex  （第二遍生成目录）
+
+\documentclass[hyperref,a4paper,UTF8]{ctexart}
+
+\usepackage[left=2.50cm, right=2.50cm, top=2.50cm, bottom=2.50cm]{geometry}
+
+\usepackage[unicode=true,colorlinks,urlcolor=blue,linkcolor=blue,bookmarksnumbered=true]{hyperref}
+\usepackage{latexsym,amssymb,amsmath,amsbsy,amsopn,amstext,amsthm,amsxtra,color,bm,calc,ifpdf}
+\usepackage{graphicx}
+\usepackage{enumerate}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{multirow}
+\usepackage{makeidx}
+\usepackage{xcolor}
+\usepackage{fontspec}
+\usepackage{subfigure}
+\usepackage{url}
+% \usepackage{pythonhighlight}  % 取消注释以启用 Python 代码高亮（需要安装 Python 与 pygments）
+
+% ==================== 作者信息（请填写） ====================
+\newcommand{\paperTitle}{在此填写论文题目}
+\newcommand{\studentName}{在此填写姓名}
+\newcommand{\studentID}{在此填写学号}
+\newcommand{\studentDept}{在此填写院系}
+\newcommand{\paperDate}{在此填写日期}
+
+\pagestyle{fancy}
+\setlength{\headheight}{14.5pt}
+\fancyhead[L]{}
+\fancyhead[C]{\fangsong \paperTitle}
+\fancyhead[R]{}
+
+\renewcommand{\abstractname}{\textbf{\large {摘\quad 要}}}
+
+\title{\textbf{\paperTitle}}
+\author{
+\kaishu\normalsize
+姓名\ \underline{\studentName} \qquad
+学号\ \underline{\studentID} \qquad
+院系\ \underline{\studentDept}
+}
+\date{\paperDate}
+
+
+\begin{document}
+
+% 北京大学校徽
+\begin{figure}
+    \centering
+    \includegraphics[width=0.15\textwidth]{pku-logo.png}
+\end{figure}
+
+\maketitle
+
+\begin{abstract}
+
+在此填写摘要内容。摘要应简明扼要地概括论文的研究背景、目的、方法、主要发现和结论。建议字数在 300-500 字之间。
+
+\end{abstract}
+
+\textbf{关键词：} 关键词1；关键词2；关键词3；关键词4；关键词5
+
+\tableofcontents
+
+\thispagestyle{empty}
+\newpage
+
+% ==================== 正文开始 ====================
+
+\section{引言}
+
+在此填写引言部分。引言应介绍研究背景、研究意义、国内外研究现状、研究问题和研究框架。
+
+\section{文献综述与理论基础}
+
+在此填写文献综述部分。本节应系统梳理相关领域的研究成果，阐述理论基础，并指出研究的创新点。
+
+\subsection{国内外研究现状}
+
+在此填写国内外研究现状。可以使用项目符号或编号列表：
+
+\begin{itemize}
+    \item 研究现状要点1
+    \item 研究现状要点2
+    \item 研究现状要点3
+\end{itemize}
+
+\subsection{理论基础}
+
+在此阐述研究的理论基础。可以引用重要公式：
+
+\begin{equation}
+    F = ma
+\end{equation}
+
+或者行内公式：$E = mc^2$。
+
+\section{研究方法}
+
+在此填写研究方法部分。描述研究设计、数据来源、分析方法等。
+
+\subsection{研究设计}
+
+在此描述研究设计。
+
+\subsection{数据收集与处理}
+
+在此描述数据收集与处理方法。
+
+\section{研究结果与分析}
+
+在此填写研究结果与分析部分。展示研究发现并进行深入分析。
+
+\subsection{描述性统计分析}
+
+可以插入表格展示数据：
+
+\begin{table}[h]
+\centering
+\caption{示例表格标题}
+\begin{tabular}{|c|c|c|}
+\hline
+\textbf{变量} & \textbf{均值} & \textbf{标准差} \\
+\hline
+变量1 & 3.45 & 0.67 \\
+变量2 & 2.89 & 0.78 \\
+变量3 & 4.12 & 0.56 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{实证分析结果}
+
+% 图片插入示例（取消注释并替换为您的图片）
+% \begin{figure}[h]
+%     \centering
+%     \includegraphics[width=0.8\textwidth]{figures/您的图片文件名.png}
+%     \caption{您的图片标题}
+% \end{figure}
+
+\section{讨论}
+
+在此填写讨论部分。将研究结果与现有文献进行比较，解释研究发现的意义。
+
+\subsection{理论贡献}
+
+在此讨论研究的理论贡献。
+
+\subsection{实践意义}
+
+在此讨论研究的实践意义。
+
+\section{结论与建议}
+
+在此填写结论与建议部分。总结研究发现，提出政策建议或未来研究方向。
+
+\subsection{主要结论}
+
+在此总结主要结论。
+
+\subsection{政策建议}
+
+在此提出政策建议。
+
+\subsection{研究局限与展望}
+
+在此说明研究局限和未来研究方向。
+
+% ==================== 参考文献 ====================
+
+\newpage
+\begin{thebibliography}{99}
+% 参考文献示例 - 请替换为您的实际参考文献
+\bibitem{ref1} 作者. 文献标题[M]. 出版地: 出版社, 年份.
+\bibitem{ref2} 作者. 文献标题[J]. 期刊名, 年份, 卷(期): 起始页码-结束页码.
+\bibitem{ref3} 作者. 文献标题[D]. 学位授予单位, 年份.
+\bibitem{ref4} 作者. 文献标题[EB/OL]. (发布日期). 获取地址
+\bibitem{ref5} 作者. 文献标题[C]// 会议名称. 会议地点: 会议主办方, 年份: 起始页码-结束页码.
+\end{thebibliography}
+
+% ==================== 附录与声明 ====================
+
+\vspace{2cm}
+\noindent\textbf{作者声明：} 在此填写作者声明内容。通常包括论文原创性声明、版权声明等。
+
+\end{document}

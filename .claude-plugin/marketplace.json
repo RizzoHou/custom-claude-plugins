@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "custom-claude-plugins",
+  "description": "Personal Claude Code plugins, opt-in per project.",
+  "owner": {
+    "name": "RizzoHou"
+  },
+  "plugins": [
+    {
+      "name": "writing",
+      "description": "Academic writing toolkit (Chinese-first): native Chinese drafting via DeepSeek, AI-trace scrubbing, structural humanizer, CJK LaTeX/xeCJK build + visual audit, bibliography authenticity check, locked polish pipeline, and a PKU paper template.",
+      "category": "writing",
+      "source": "./plugins/writing"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+# init scripts — each plugin ships one, kept local
+plugins/*/[!.]*-init
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# LaTeX build artifacts (in case templates get compiled locally)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
