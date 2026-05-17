@@ -32,7 +32,7 @@ jq '.enabledPlugins["writing@custom-claude-plugins"] = true' \
 
 Then restart Claude Code in that project to load the plugin.
 
-If you toggle plugins often, wrap the above in a local helper script and put it on `$PATH`. This repo's `.gitignore` reserves the pattern `plugins/*/[!.]*-init` for such per-plugin helpers (e.g. `plugins/writing/writing-init`) — keep them out of the published tree since they typically encode personal paths.
+If you toggle plugins often, wrap the above in a local helper script and put it on `$PATH`. This repo's `.gitignore` reserves the pattern `plugins/*/[!.]*-init` for such per-plugin helpers (e.g. `plugins/writing/claude-writing-init`) — keep them out of the published tree since they typically encode personal paths.
 
 ## Adding a new plugin
 
