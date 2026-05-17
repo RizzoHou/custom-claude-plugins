@@ -18,24 +18,24 @@ A personal marketplace of Claude Code plugins, opt-in per project.
 
 ## Enable in a project
 
-The plugins are intentionally **not enabled globally**. To turn one on in the current project, run its `*-init` script. For example, to enable `writing`:
+The plugins are intentionally **not enabled globally**. To turn one on in the current project, merge an `enabledPlugins` entry into the project's `.claude/settings.json`. For example, to enable `writing`:
 
 ```bash
-# from anywhere
-/path/to/custom-claude-plugins/plugins/writing/writing-init
+mkdir -p .claude
+jq '.enabledPlugins["writing@custom-claude-plugins"] = true' \
+  .claude/settings.json 2>/dev/null \
+  > .claude/settings.json.tmp \
+  && mv .claude/settings.json.tmp .claude/settings.json \
+  || echo '{"enabledPlugins":{"writing@custom-claude-plugins":true}}' \
+       > .claude/settings.json
 ```
 
-This merges `{"enabledPlugins": {"writing@custom-claude-plugins": true}}` into the project's `.claude/settings.json`. Restart Claude Code in that project to load the plugin.
+Then restart Claude Code in that project to load the plugin.
 
-Symlinking the init scripts onto `$PATH` keeps things ergonomic:
-
-```bash
-ln -s /path/to/custom-claude-plugins/plugins/writing/writing-init ~/.local/bin/writing-init
-```
+If you toggle plugins often, wrap the above in a local helper script and put it on `$PATH`. This repo's `.gitignore` reserves the pattern `plugins/*/[!.]*-init` for such per-plugin helpers (e.g. `plugins/writing/writing-init`) — keep them out of the published tree since they typically encode personal paths.
 
 ## Adding a new plugin
 
 1. Create `plugins/<name>/.claude-plugin/plugin.json`.
 2. Drop skills into `plugins/<name>/skills/<skill>/SKILL.md`.
-3. Drop a `<name>-init` script alongside (gitignored).
-4. Add an entry to `.claude-plugin/marketplace.json`.
+3. Add an entry to `.claude-plugin/marketplace.json`.

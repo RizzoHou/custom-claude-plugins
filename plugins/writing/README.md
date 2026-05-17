@@ -22,7 +22,19 @@ Academic writing toolkit for Claude Code, Chinese-first.
 
 ## Enable in a project
 
-Run `./writing-init` from inside the project where you want the plugin active. It merges the enable flag into `.claude/settings.json` and that's it.
+Merge the enable flag into the project's `.claude/settings.json`, then restart Claude Code in that project:
+
+```bash
+mkdir -p .claude
+jq '.enabledPlugins["writing@custom-claude-plugins"] = true' \
+  .claude/settings.json 2>/dev/null \
+  > .claude/settings.json.tmp \
+  && mv .claude/settings.json.tmp .claude/settings.json \
+  || echo '{"enabledPlugins":{"writing@custom-claude-plugins":true}}' \
+       > .claude/settings.json
+```
+
+See the marketplace README for guidance on wrapping this in a local helper script if you toggle it often.
 
 ## Prerequisites
 
