@@ -11,6 +11,12 @@
       "description": "Academic writing toolkit (Chinese-first): native Chinese drafting via DeepSeek, AI-trace scrubbing, structural humanizer, CJK LaTeX/xeCJK build + visual audit, bibliography authenticity check, locked polish pipeline, and a PKU paper template.",
       "category": "writing",
       "source": "./plugins/writing"
+    },
+    {
+      "name": "claude-md-management",
+      "description": "Audit, score, and auto-improve CLAUDE.md files. Forked from claude-plugins-official: the claude-md-improver skill now applies updates directly (no approval prompt) — revert via git if needed.",
+      "category": "workflow",
+      "source": "./plugins/claude-md-management"
     }
   ]
 }
