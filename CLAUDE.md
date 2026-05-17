@@ -21,6 +21,7 @@ Marketplace `source` entries are relative: `"source": "./plugins/<name>"`.
 - **Plugins ship disabled.** Enabling is per-project via `.claude/settings.json`: `{"enabledPlugins": {"<plugin>@custom-claude-plugins": true}}`. Never add to global `~/.claude/settings.json`.
 - **Templates: PII gets `\newcommand` placeholders, not deletion.** When bundling a real-world LaTeX template, replace identifying fields with `\newcommand{\studentName}{...}` style placeholders so users fill in once and the value propagates.
 - **Bundled third-party content (reference files, samples, style anchors) requires explicit redistribution review before pushing**, since this repo is public. The `writing` plugin's `de-AI-writing/references/{writing-samples,style-dna}.md` ship quoted prose from published essays — that decision was made consciously this session, not by default. Future skills bundling third-party content: ask the user before publishing.
+- **Promoting a global skill into a plugin means deleting the global copy.** Global skills live in `~/projects/claude-code-config/skills/` (symlinked to `~/.claude/skills/`) and load unconditionally in every project — leaving a copy there preempts the plugin and defeats per-project opt-in. After packaging a skill under `plugins/<name>/skills/`, remove the matching directory from the config repo and commit.
 
 ## Adding a new plugin
 
