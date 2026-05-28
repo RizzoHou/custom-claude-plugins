@@ -6,6 +6,7 @@ A personal marketplace of Claude Code plugins, opt-in per project.
 
 - **`writing`** — academic writing toolkit (Chinese-first). Native Chinese drafting via DeepSeek, AI-trace scrubbing, CJK LaTeX/xeCJK build + visual audit, bibliography authenticity check, and a locked polish pipeline. Ships a PKU paper LaTeX template.
 - **`claude-md-management`** — audit, score, and auto-improve `CLAUDE.md` files. Fork of the official Anthropic plugin; the `claude-md-improver` skill applies updates directly (no approval prompt). Revert via `git` if unwanted.
+- **`claude-ai-tutor-kit`** — prepare per-section study packets for claude.ai tutored learning sessions. Scoped to Chinese-textbook university courses. Three skills: `course-exam-distill` (one-time exam-paper analysis), `course-split-section` (per-section PDF assembly), `course-init-prompt` (drafts Chinese init prompt with `humanizer-zh` pass).
 
 ## Install
 
