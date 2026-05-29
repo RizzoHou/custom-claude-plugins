@@ -3,9 +3,10 @@ name: course-init-prompt
 description: |
   Draft the Chinese init_prompt.md file that the user pastes into a fresh
   claude.ai session along with the per-section attachments. Pulls context
-  from the section's textbook.pdf, the chapter's learning notes (noting
-  scope mismatches), the assignment list, and (if present) the course's
-  exam_analysis.md. Then runs writing:humanizer-zh on the draft if the
+  from the section's textbook.pdf, the assignment list, any supplementary
+  materials in the section folder (notes, handouts — noting scope mismatches
+  on copied-whole notes), and (if present) the course's exam_analysis.md.
+  Then runs writing:humanizer-zh on the draft if the
   writing plugin is enabled. Functional instructions, not literary prose —
   do not run the full zh-prose-polish pipeline.
 allowed-tools:
@@ -21,15 +22,15 @@ metadata:
 
 # course-init-prompt
 
-You write the first message the user will paste into a new claude.ai session, alongside three attachments. The prompt is in Chinese, ~30–40 lines, functional rather than literary.
+You write the first message the user will paste into a new claude.ai session, alongside the section's attachments (textbook, assignment, and any supplementary materials). The prompt is in Chinese, ~30–40 lines, functional rather than literary.
 
 ## Inputs
 
 A section folder, e.g. `splits/ch10/sec05/`, containing:
 
 - `textbook.pdf` (already sliced)
-- `official_learning_notes.pdf` (full chapter, may understate scope)
 - `assignment.md` (already transcribed)
+- **0..N supplementary material files** — everything in the folder that is not `textbook.pdf`, `assignment.md`, or `init_prompt.md`. PDFs are copied whole, `.md` files are transcriptions; filenames signal origin (e.g. `official_notes_ch10.pdf`, `my_handwritten_notes.md`). Glob the folder for these and `Read` each to confirm what it is before describing it.
 
 Optionally, at the project root: `materials/exam_analysis.md` (produced by `course-exam-distill`). Use it if present.
 
@@ -41,10 +42,10 @@ Optionally, at the project root: `materials/exam_analysis.md` (produced by `cour
 
 1. **Title line**: e.g. `# 高数 A2 第十章第 5 节（幂级数）`.
 
-2. **Attachment explanations** — three short paragraphs:
+2. **Attachment explanations** — one short paragraph per file actually present in the folder:
    - `textbook.pdf` — this section's body + 习题 X.Y, sliced from the scanned textbook.
-   - `official_learning_notes.pdf` — the chapter notes. If the file's scope is broader than its name suggests (e.g. `ch10_learning_notes.pdf` covers ch10 AND ch11), warn explicitly here.
    - `assignment.md` — this section's assigned problems (上交 / 不上交).
+   - Each supplementary file — say what it is (read it to confirm: official chapter notes, your handwritten notes, a handout) and its form (whole copy vs transcription). If a copied-whole notes file's scope is broader than its name suggests (e.g. `official_notes_ch10.pdf` covers ch10 AND ch11), warn explicitly here. If there are no supplementary files, omit this and don't invent one.
 
 3. **Course context** — one short paragraph: this section's place in the chapter's overall framework, dependencies on prior sections, and (if `exam_analysis.md` exists) one sentence on how heavily this section is tested in past papers. Do not over-claim from a thin sample.
 

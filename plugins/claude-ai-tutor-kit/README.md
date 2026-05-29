@@ -4,15 +4,15 @@ Prepare per-section study packets for tutored learning sessions on [claude.ai](h
 
 ## Why this exists
 
-The workflow assumes you are studying a course through chat-interface Claude sessions, one section at a time. For each section you upload three attachments (textbook excerpt, chapter learning notes, assignment list) and paste a Chinese init prompt that tells Claude what you want from this session. Preparing those four artifacts manually for every section is repetitive — these skills automate it.
+The workflow assumes you are studying a course through chat-interface Claude sessions, one section at a time. For each section you upload the section's attachments (textbook excerpt, assignment list, and any supplementary materials — official or handwritten notes, handouts, readings) and paste a Chinese init prompt that tells Claude what you want from this session. Preparing those artifacts manually for every section is repetitive — these skills automate it.
 
 ## Skills
 
 | Skill | When to run |
 |---|---|
 | `course-exam-distill` | **Once per course** (or after new exam papers are added). Reads everything under `materials/exam_papers/`, produces `materials/exam_analysis.md` with topic frequency, problem-type distribution, and a judgment call on high-leverage areas. |
-| `course-split-section` | **Once per section.** Slices the source textbook PDF to cover section body + 习题 X.Y, copies the chapter learning notes verbatim (cross-references would break under slicing), transcribes the assignment list. Calls `course-init-prompt` at the end. |
-| `course-init-prompt` | Invoked by `course-split-section`. Drafts the Chinese `init_prompt.md` and runs `writing:humanizer-zh` if the `writing` plugin is enabled in the project. |
+| `course-split-section` | **Once per section.** Slices the source textbook PDF to cover section body + 习题 X.Y, transcribes the assignment list, and preserves each supplementary material (notes, handouts) by a fidelity-first rubric — copied whole when scanned/handwritten/cross-referencing, transcribed when that aids grasp. Hands off to `course-init-prompt` as the next step (you run it separately). |
+| `course-init-prompt` | Run after `course-split-section` (a separate step, not auto-invoked). Drafts the Chinese `init_prompt.md` and runs `writing:humanizer-zh` if the `writing` plugin is enabled in the project. |
 
 ## Default project layout
 
@@ -21,8 +21,8 @@ The workflow assumes you are studying a course through chat-interface Claude ses
 ├── materials/                              # instructor-provided, treat as read-only
 │   ├── textbook.pdf
 │   ├── assignment_aggregation.pdf
-│   ├── official_learning_notes/
-│   │   └── chNN_learning_notes.pdf
+│   ├── official_learning_notes/            # one kind of supplementary material;
+│   │   └── chNN_learning_notes.pdf         #   handwritten_notes/, handouts/, … also fine
 │   ├── exam_papers/                        # any nested layout under here
 │   │   ├── spring_midterm/.../*.pdf
 │   │   └── ...
@@ -30,9 +30,10 @@ The workflow assumes you are studying a course through chat-interface Claude ses
 └── splits/                                 # generated per section
     └── chNN/secMM/
         ├── textbook.pdf
-        ├── official_learning_notes.pdf
         ├── assignment.md
-        └── init_prompt.md
+        ├── init_prompt.md
+        └── official_notes_chNN.pdf         # 0..N supplementary files: .pdf = copied
+                                            #   whole, .md = transcribed
 ```
 
 Alternate layouts are accepted. To override defaults, add a `## claude-ai-tutor-kit configuration` section to the project's `CLAUDE.md`:
@@ -43,11 +44,12 @@ Alternate layouts are accepted. To override defaults, add a `## claude-ai-tutor-
 - materials_dir: lectures
 - splits_dir: notes
 - exam_papers_dir: lectures/past_exams
-- learning_notes_pattern: lectures/notes/ch{NN}.pdf
 - assignment_aggregation_file: lectures/all_assignments.pdf
+- supplementary_material: lectures/official_notes/ch{NN}.pdf (official chapter notes, chapter-scoped)
+- supplementary_material: lectures/my_notes/sec{MM}.pdf (my handwritten notes)
 ```
 
-All keys are optional; missing keys fall back to the defaults shown above this snippet. Skills grep the project's `CLAUDE.md` for this section before guessing. If the section is absent and the default paths don't exist, skills ask the user rather than inventing locations.
+All keys are optional; missing keys fall back to the defaults shown above this snippet. `supplementary_material` is the one repeatable key — list it once per source, each value a path or glob with `{NN}` (chapter) / `{MM}` (section) tokens and an optional parenthetical naming its type/scope. `learning_notes_pattern` is still honored as a back-compat alias for a single official-notes source. Skills grep the project's `CLAUDE.md` for this section before guessing; if the section is absent and the default paths don't exist, they ask rather than inventing locations.
 
 ## Prerequisites
 
@@ -76,7 +78,7 @@ If you toggle this often, see the marketplace README for the local-helper-script
 2. Enable the plugin in `.claude/settings.json`, restart Claude Code.
 3. Run `course-exam-distill` once. Sanity-check `materials/exam_analysis.md`.
 4. For each section you want to study: `course-split-section` with the chapter and section identifiers. Review the generated `init_prompt.md`.
-5. Upload the four files in the section folder to a fresh claude.ai session, paste the init prompt, study.
+5. Upload `textbook.pdf`, `assignment.md`, and the supplementary files from the section folder to a fresh claude.ai session; paste `init_prompt.md`; study.
 
 ## Scope and limitations
 
