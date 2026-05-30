@@ -12,7 +12,7 @@ The workflow assumes you are studying a course through chat-interface Claude ses
 |---|---|
 | `course-exam-distill` | **Once per course** (or after new exam papers are added). Reads everything under `materials/exam_papers/`, produces `materials/exam_analysis.md` with topic frequency, problem-type distribution, and a judgment call on high-leverage areas. |
 | `course-split-section` | **Once per section.** Slices the source textbook PDF to cover section body + 习题 X.Y, transcribes the assignment list, and preserves each supplementary material (notes, handouts) by a fidelity-first rubric — copied whole when scanned/handwritten/cross-referencing, transcribed when that aids grasp. Hands off to `course-init-prompt` as the next step (you run it separately). |
-| `course-init-prompt` | Run after `course-split-section` (a separate step, not auto-invoked). Drafts the Chinese `init_prompt.md` and runs `writing:humanizer-zh` if the `writing` plugin is enabled in the project. |
+| `course-init-prompt` | Run after `course-split-section` (a separate step, not auto-invoked). Drafts the Chinese `init_prompt.md`, has the claude.ai session connect new material to any attached prior-learning notes, and runs `writing:humanizer-zh` if the `writing` plugin is enabled in the project. |
 
 ## Default project layout
 
@@ -46,10 +46,10 @@ Alternate layouts are accepted. To override defaults, add a `## claude-ai-tutor-
 - exam_papers_dir: lectures/past_exams
 - assignment_aggregation_file: lectures/all_assignments.pdf
 - supplementary_material: lectures/official_notes/ch{NN}.pdf (official chapter notes, chapter-scoped)
-- supplementary_material: lectures/my_notes/sec{MM}.pdf (my handwritten notes)
+- supplementary_material: lectures/my_notes/sec{MM}.pdf (my handwritten notes — prior learning anchor)
 ```
 
-All keys are optional; missing keys fall back to the defaults shown above this snippet. `supplementary_material` is the one repeatable key — list it once per source, each value a path or glob with `{NN}` (chapter) / `{MM}` (section) tokens and an optional parenthetical naming its type/scope. `learning_notes_pattern` is still honored as a back-compat alias for a single official-notes source. Skills grep the project's `CLAUDE.md` for this section before guessing; if the section is absent and the default paths don't exist, they ask rather than inventing locations.
+All keys are optional; missing keys fall back to the defaults shown above this snippet. `supplementary_material` is the one repeatable key — list it once per source, each value a path or glob with `{NN}` (chapter) / `{MM}` (section) tokens and an optional parenthetical naming its type/scope. Mark a source as a **prior-learning anchor** by putting `prior learning anchor` in its parenthetical — your own record of what you have *already* learned. `course-split-section` copies it with a `prior_` filename prefix, and `course-init-prompt` then has the claude.ai session actively connect each new concept to what is already in those notes (Phase 1 hooks the section's skeleton onto a named prior concept; Phase 2 flags dependencies and contrasts per detail round). Because the claude.ai session is stateless and sees only the files you attach, those connections are bounded to the attached notes — to link back to an earlier section, attach that section's notes too. Sections split before you added the tag won't have the `prior_` file; re-run `course-split-section` for them to pick up the anchor. `learning_notes_pattern` is still honored as a back-compat alias for a single official-notes source. Skills grep the project's `CLAUDE.md` for this section before guessing; if the section is absent and the default paths don't exist, they ask rather than inventing locations.
 
 ## Prerequisites
 

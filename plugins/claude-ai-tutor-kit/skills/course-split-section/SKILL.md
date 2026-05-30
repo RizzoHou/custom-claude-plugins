@@ -39,7 +39,7 @@ The user names a chapter and section (e.g. "ch10 sec05") and may give a PDF page
 - `materials/exam_analysis.md` — optional, produced by `course-exam-distill`.
 - `splits/chNN/secMM/` — destination folder.
 
-If the project uses a non-default layout, grep the project's root `CLAUDE.md` for a `## claude-ai-tutor-kit configuration` section. Inside, look for bulleted `- key: value` lines — relevant keys here are `materials_dir`, `splits_dir`, `assignment_aggregation_file`, and **every** `supplementary_material` line (this key repeats — collect all of them, not just the first). `learning_notes_pattern` is honored as a back-compat alias for a single official-notes source. Each `supplementary_material` value is a path or glob (supporting `{NN}` chapter / `{MM}` section tokens) with an optional parenthetical naming its type/scope. If the config section is absent and the default paths don't exist, ask the user before guessing — do not invent paths. If no supplementary materials are configured or found, proceed with textbook + assignment only and say so in your report.
+If the project uses a non-default layout, grep the project's root `CLAUDE.md` for a `## claude-ai-tutor-kit configuration` section. Inside, look for bulleted `- key: value` lines — relevant keys here are `materials_dir`, `splits_dir`, `assignment_aggregation_file`, and **every** `supplementary_material` line (this key repeats — collect all of them, not just the first). `learning_notes_pattern` is honored as a back-compat alias for a single official-notes source. Each `supplementary_material` value is a path or glob (supporting `{NN}` chapter / `{MM}` section tokens) with an optional parenthetical naming its type/scope. A parenthetical containing the literal phrase `prior learning anchor` flags the source as the user's own record of what they have already learned (e.g. `(my handwritten notes — prior learning anchor)`): name that source's destination with a `prior_` prefix (step 3) so `course-init-prompt` recognizes it as the notes to connect new material against. Match the literal phrase — do not infer anchor status from other wording. If the config section is absent and the default paths don't exist, ask the user before guessing — do not invent paths. If no supplementary materials are configured or found, proceed with textbook + assignment only and say so in your report.
 
 ## Output (per section)
 
@@ -48,7 +48,7 @@ In `splits/chNN/secMM/`:
 1. `textbook.pdf` — sliced consecutive page range covering section body + section exercises (习题 X.Y). Always present.
 2. `assignment.md` — transcribed assignment list for this section. Always present.
 3. `init_prompt.md` — drafted by the `course-init-prompt` skill, called at the end. Always present.
-4. **0..N supplementary material files** — one per supplementary source that applies to this section, each preserved per the rubric in step 3. Name each so its origin and form are obvious (e.g. `official_notes_ch10.pdf` for a verbatim copy, `my_handwritten_notes.md` for a transcription — the extension signals form: `.pdf` = copied as image, `.md` = transcribed text). No separate manifest; the filenames carry the provenance.
+4. **0..N supplementary material files** — one per supplementary source that applies to this section, each preserved per the rubric in step 3. Name each so its origin and form are obvious (e.g. `official_notes_ch10.pdf` for a verbatim copy, `my_handwritten_notes.md` for a transcription — the extension signals form: `.pdf` = copied as image, `.md` = transcribed text). A source tagged as a prior-learning anchor additionally takes a `prior_` prefix (e.g. `prior_notes_sec05.pdf`); that prefix is the contract `course-init-prompt` reads to know which notes to connect new material against. No separate manifest; the filenames carry the provenance.
 
 ## Procedure
 
@@ -93,7 +93,7 @@ cp <materials_dir>/official_learning_notes/chNN_learning_notes.pdf \
    <splits_dir>/chNN/secMM/official_notes_chNN.pdf
 ```
 
-For other sources, substitute the configured path and a destination name that signals origin + form (`.pdf` for a copy, `.md` for a transcription).
+For other sources, substitute the configured path and a destination name that signals origin + form (`.pdf` for a copy, `.md` for a transcription). If the source's config parenthetical contains the literal phrase `prior learning anchor`, prefix the destination name with `prior_` (e.g. `prior_notes_sec05.pdf`).
 
 ### 4. Transcribe the assignment
 
@@ -135,7 +135,7 @@ Tell the user:
 - Which page range you used and why.
 - One sentence on what you saw on the first and last pages of the sliced textbook.
 - The destination folder.
-- Each supplementary material you brought in, and how you preserved it (copied whole / transcribed / excerpted) in a few words — or, if none, that you proceeded with textbook + assignment only.
+- Each supplementary material you brought in, and how you preserved it (copied whole / transcribed / excerpted) in a few words — or, if none, that you proceeded with textbook + assignment only. Note which (if any) you named with a `prior_` prefix as a prior-learning anchor.
 - Whether `exam_analysis.md` was consulted.
 - Anything you flagged for the project CLAUDE.md.
 - That `course-init-prompt` is the next step.
