@@ -1,7 +1,7 @@
 {
   "name": "claude-ai-tutor-kit",
   "description": "Prepare per-section study packets for claude.ai tutored learning sessions. Scoped to Chinese-textbook university courses (scanned PDF textbook + separate aggregated assignment list + chapter/section structure). Three skills: course-exam-distill (one-time exam-paper analysis + per-problem locator index), course-split-section (per-section study-packet assembly, including related past-paper problems), course-init-prompt (drafts Chinese init prompt with direct past-paper references and humanizer-zh pass).",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": {
     "name": "RizzoHou"
   }

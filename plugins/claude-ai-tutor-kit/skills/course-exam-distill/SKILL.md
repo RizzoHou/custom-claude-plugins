@@ -20,7 +20,7 @@ allowed-tools:
   - Grep
 metadata:
   trigger: distill past-exam papers into a course-level study weight analysis
-  scope: Chinese-textbook university courses with scanned image-only exam PDFs
+  scope: Chinese-textbook university courses with scanned image-only exam papers (PDF or image files — jpg/png/etc.)
 ---
 
 # course-exam-distill
@@ -31,7 +31,7 @@ You distill a folder of past exam papers into a single study-weight analysis. Pe
 
 A course project directory. Default layout:
 
-- `materials/exam_papers/<category>/<paper>/<file>.pdf` — typically organized by `spring_midterm/`, `spring_final/`, `fall_midterm/`, `fall_final/`. Each paper folder may contain the exam PDF and student-authored solution PDFs.
+- `materials/exam_papers/<category>/<paper>/<file>` — typically organized by `spring_midterm/`, `spring_final/`, `fall_midterm/`, `fall_final/`. Each paper folder may contain the exam and student-authored solutions. A paper file is **a PDF or an image** (`.jpg/.jpeg/.png/.webp/.tif/.tiff/.gif/.bmp`) — scans arrive in whatever format the source used; do not assume `.pdf`.
 - `materials/textbook.pdf` — for chapter/section reference.
 
 If those default paths do not exist, grep the project's root `CLAUDE.md` for a `## claude-ai-tutor-kit configuration` section. Inside, look for bulleted `- key: value` lines — the relevant keys here are `materials_dir` and `exam_papers_dir`. If the section is absent and the default paths don't exist, ask the user before guessing.
@@ -42,11 +42,19 @@ If those default paths do not exist, grep the project's root `CLAUDE.md` for a `
 
 ## Procedure
 
-1. **Inventory.** List every paper PDF under `exam_papers/`. Distinguish exam papers from student-authored solutions (filenames often contain `solution`, `answer`, `by_<name>`). Solutions are useful for cross-checking topic coverage but should not be double-counted.
+1. **Inventory.** List every paper **file** under `exam_papers/`, PDF *and* image — do **not** glob `*.pdf` alone, which silently drops an image-format paper (a real bug seen in the field: an `a2_2025_final.jpg` paper missed by a PDF-only listing). Use a multi-extension listing:
+
+   ```bash
+   find <exam_papers_dir> -type f \( -iname '*.pdf' -o -iname '*.jpg' -o -iname '*.jpeg' \
+     -o -iname '*.png' -o -iname '*.webp' -o -iname '*.tif' -o -iname '*.tiff' \
+     -o -iname '*.gif' -o -iname '*.bmp' \) | sort
+   ```
+
+   The `Read` tool ingests both PDFs and these raster images, so all are readable. If a paper appears in a format `Read` cannot ingest (e.g. `.docx`, `.zip`, video), do **not** guess its contents — stop and tell the user. Distinguish exam papers from student-authored solutions (filenames often contain `solution`, `answer`, `by_<name>`). Solutions are useful for cross-checking topic coverage but should not be double-counted.
 
 2. **Identify the course code family.** If the current course is `advanced_mathematics_a2`, papers from sibling families (e.g. `advanced_mathematics_b2`) often share most topics but may have different difficulty / topic weighting. Note this in the analysis — do not assume `b2` papers are 1:1 representative of `a2` exams.
 
-3. **Read each paper.** Most will be image-only scanned PDFs — use `Read` on the PDF path (it ingests pages as images). Do not skip reading because there is no text layer. For papers 10+ pages, read all pages; for shorter ones, the same.
+3. **Read each paper.** Most are image-only scans — either a scanned PDF or a plain image file. Use `Read` on the file path; it ingests PDFs (page by page) and image files alike as images. Do not skip reading because there is no text layer. For multi-page PDFs (10+ pages), read all pages; a single image file is one "page" (record its 页码 as `1`).
 
 4. **Per paper, log:**
    - Year, season, midterm/final, course code (e.g. `a2-2024-final`).
