@@ -31,6 +31,14 @@ Marketplace `source` entries are relative: `"source": "./plugins/<name>"`.
 3. Append an entry to `.claude-plugin/marketplace.json`.
 4. Optional: local `plugins/<name>/<name>-init` script (gitignored).
 
+## Updating an existing plugin
+
+`claude plugin update` is **version-gated, not content-gated**: editing a `SKILL.md` without bumping the plugin's `version` makes update a silent no-op. To ship a change:
+
+1. Edit, then **bump `version`** in `plugins/<name>/.claude-plugin/plugin.json` (new feature → minor bump).
+2. Commit + **push to `main`** — the installed marketplace `source` is the GitHub repo, so update pulls from the remote, not the local working copy. Unpushed edits won't propagate.
+3. `claude plugin marketplace update custom-claude-plugins`, then `claude plugin update <name>@custom-claude-plugins` (the `@marketplace` suffix is **required** — the bare name errors `not found`). Restart to apply; the new version installs to a fresh `cache/.../<version>/` dir.
+
 ## Testing a plugin loads
 
 `/plugin marketplace add RizzoHou/custom-claude-plugins`, then `/plugin install <name>@custom-claude-plugins`, then enable in a test project's `.claude/settings.json` and restart Claude Code in that project.
