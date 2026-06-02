@@ -32,6 +32,26 @@ find . -name "CLAUDE.md" -o -name ".claude.md" -o -name ".claude.local.md" 2>/de
 
 **Note:** Claude auto-discovers CLAUDE.md files in parent directories, making monorepo setups work automatically.
 
+### Phase 1.5: Size Budget Check
+
+Measure each CLAUDE.md's character count *before* doing anything else. CLAUDE.md is loaded into every session's context, so unbounded growth is a real cost.
+
+```bash
+wc -m CLAUDE.md  # character count (use -m, not -c, for multi-byte safety)
+```
+
+**Budget: 39,000 characters per file.**
+
+- **Under 39k:** proceed normally. Additions are allowed if they add real value.
+- **At or over 39k:** the file is **over budget**. Do **not** add new content without first removing equal-or-greater content. Pruning takes priority over additions this run. Surface the overage at the top of the quality report.
+
+When pruning to fit the budget, prefer in this order:
+1. **Consolidate** — merge overlapping sections, collapse redundant examples.
+2. **Compress** — replace verbose explanations with one-liners; drop filler prose.
+3. **Delete** — remove stale commands, obsolete architecture notes, one-off fix recipes, and anything already obvious from the code or git history.
+
+Record the pre-update size; you will re-check it in Phase 5.
+
 ### Phase 2: Quality Assessment
 
 For each CLAUDE.md file, evaluate against quality criteria. See [references/quality-criteria.md](references/quality-criteria.md) for detailed rubrics.
@@ -136,6 +156,8 @@ After outputting the quality report, apply targeted updates directly — do **no
 ### Phase 5: Apply Updates
 
 Apply changes using the Edit tool — do not wait for approval. Preserve existing content structure. As you apply each change, surface the file, the diff, and a one-line reason so the user has a clear record of what was modified.
+
+**Post-update size check (mandatory):** after applying changes, re-run `wc -m` on each modified file and report the new size alongside the pre-update size. If a file is now ≥39k characters, flag it loudly and propose a follow-up pruning pass — do not consider the run complete with a file over budget.
 
 ## Templates
 
