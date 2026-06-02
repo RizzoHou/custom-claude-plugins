@@ -9,9 +9,12 @@ description: |
   separate step after), and 0..N supplementary materials (official or
   handwritten notes, handouts, anything else) each preserved by a
   fidelity-first rubric: copied whole when scanned, handwritten, or
-  cross-referencing; transcribed when that helps Claude grasp it. Default
-  layout is materials/ + splits/chNN/secMM/; alternate layouts via CLAUDE.md
-  overrides or explicit user direction.
+  cross-referencing; transcribed when that helps Claude grasp it. When
+  exam_analysis.md has a 原题索引, also pulls this section's related past-paper
+  problems into past_paper_problems.md/.pdf (statements only, tagged by paper
+  family) so the claude.ai session can quote them directly. Default layout is
+  materials/ + splits/chNN/secMM/; alternate layouts via CLAUDE.md overrides
+  or explicit user direction.
 allowed-tools:
   - Read
   - Write
@@ -36,7 +39,7 @@ The user names a chapter and section (e.g. "ch10 sec05") and may give a PDF page
 - `materials/textbook.pdf` — scanned image-only source.
 - `materials/assignment_aggregation.pdf` — aggregated assignment list across all sections.
 - **Supplementary materials** — 0..N items of any type: official chapter notes, your own handwritten notes, handouts, supplementary readings. Default location `materials/official_learning_notes/chNN_learning_notes.pdf` (back-compat); add more via CLAUDE.md config (below). These are the materials the preservation rubric in step 3 governs.
-- `materials/exam_analysis.md` — optional, produced by `course-exam-distill`.
+- `materials/exam_analysis.md` — optional, produced by `course-exam-distill`. Beyond the weight summary, its 原题索引 table (章/节 · 试卷 · 题号 · 源文件 · 页码 · 一行题意 · 卷别) is the lookup you use in step 3b to find past-paper problems related to this section.
 - `splits/chNN/secMM/` — destination folder.
 
 If the project uses a non-default layout, grep the project's root `CLAUDE.md` for a `## claude-ai-tutor-kit configuration` section. Inside, look for bulleted `- key: value` lines — relevant keys here are `materials_dir`, `splits_dir`, `assignment_aggregation_file`, and **every** `supplementary_material` line (this key repeats — collect all of them, not just the first). `learning_notes_pattern` is honored as a back-compat alias for a single official-notes source. Each `supplementary_material` value is a path or glob (supporting `{NN}` chapter / `{MM}` section tokens) with an optional parenthetical naming its type/scope. A parenthetical containing the literal phrase `prior learning anchor` flags the source as the user's own record of what they have already learned (e.g. `(my handwritten notes — prior learning anchor)`): name that source's destination with a `prior_` prefix (step 3) so `course-init-prompt` recognizes it as the notes to connect new material against. Match the literal phrase — do not infer anchor status from other wording. If the config section is absent and the default paths don't exist, ask the user before guessing — do not invent paths. If no supplementary materials are configured or found, proceed with textbook + assignment only and say so in your report.
@@ -49,6 +52,7 @@ In `splits/chNN/secMM/`:
 2. `assignment.md` — transcribed assignment list for this section. Always present.
 3. `init_prompt.md` — drafted by the `course-init-prompt` skill, called at the end. Always present.
 4. **0..N supplementary material files** — one per supplementary source that applies to this section, each preserved per the rubric in step 3. Name each so its origin and form are obvious (e.g. `official_notes_ch10.pdf` for a verbatim copy, `my_handwritten_notes.md` for a transcription — the extension signals form: `.pdf` = copied as image, `.md` = transcribed text). A source tagged as a prior-learning anchor additionally takes a `prior_` prefix (e.g. `prior_notes_sec05.pdf`); that prefix is the contract `course-init-prompt` reads to know which notes to connect new material against. No separate manifest; the filenames carry the provenance.
+5. **`past_paper_problems.md` (and/or `past_paper_problems.pdf`) — present only when past-paper problems map to this section** (step 3b). Holds the actual statements of related past-exam problems, each labeled by paper family, so the claude.ai session can quote them when teaching the matching topic. Omitted entirely when `exam_analysis.md` has no index or nothing maps to this section.
 
 ## Procedure
 
@@ -95,6 +99,32 @@ cp <materials_dir>/official_learning_notes/chNN_learning_notes.pdf \
 
 For other sources, substitute the configured path and a destination name that signals origin + form (`.pdf` for a copy, `.md` for a transcription). If the source's config parenthetical contains the literal phrase `prior learning anchor`, prefix the destination name with `prior_` (e.g. `prior_notes_sec05.pdf`).
 
+### 3b. Pull in related past-paper problems
+
+The claude.ai session is stateless and sees only what is uploaded. For it to give the user **direct, quotable references to past-exam problems** (the feature this step exists for), the actual problem statements must be in the packet — a pointer to `exam_analysis.md` does nothing, because that file is never uploaded.
+
+1. **Gate.** Only run this step if `materials/exam_analysis.md` exists and contains an 原题索引 table. If it is missing or has no index, skip — produce no past-paper file and say so in the report. Do not invent problems.
+
+2. **Look up this section's rows.** Read the 原题索引 and select rows whose 章/节 maps to this chapter/section. Match **generously and by topic, not just the label** — section mappings are heuristic and a problem may be filed under a *different* section than the one introducing the concept (e.g. a 对偶基 problem filed under 双线性函数 still belongs to the section that defines 对偶基). So also scan the 一行题意 column for this section's core concepts and pull those rows even when their 章/节 sits in another chapter. (`course-exam-distill` is told to emit a row per touched section, so the row should already exist — but match on topic anyway, in case an older index predates that rule.) **Cap at a handful** (≈3–6); when over the cap, keep `直接 A 卷` rows over `同源旁证`, and the rows whose 一行题意 is closest to this section's core. If you drop matches to stay under the cap, note it in the report — never silently truncate.
+
+3. **Fetch each statement via its locator.** Use the row's 源文件 + 页码 to `Read` *only those page(s)* of the exam PDF (it ingests pages as images). Do not re-read the whole corpus — that is what the index spares you. Capture the **problem statement only**, not any solution; the session should teach the problem, not recite an answer.
+
+4. **Preserve per the same fidelity rubric as step 3.** Clean text → transcribe into `past_paper_problems.md`. Matrices / diagrams / anything that garbles under transcription → `pdfseparate`/`pdfunite` the page(s) into `past_paper_problems.pdf` (the same garble caveat that applies to scanned exercises applies here). Either form is fine; use both if some problems transcribe cleanly and others must be sliced.
+
+5. **Label every entry by paper family.** This labeling is the contract `course-init-prompt` relies on so the session never passes off a sibling-family problem as direct evidence. Tag each `直接 A 卷` or `同源旁证（B 卷 / 兄弟课程）`, and cite year/season/题号. Markdown shape:
+
+   ```markdown
+   # 与本节相关的历年真题
+
+   ## 2024 春 A 期末 第6题  [直接 A 卷]
+
+   <题目原文（仅题面，不含解答）>
+
+   ## 2023 春 B 期末 第4题  [B 卷·旁证]
+
+   <题目原文>
+   ```
+
 ### 4. Transcribe the assignment
 
 Open `materials/assignment_aggregation.pdf` and find this chapter+section's row. Write `splits/chNN/secMM/assignment.md` in Chinese:
@@ -120,7 +150,7 @@ Only transcribe problem numbers — problem text lives in `textbook.pdf`. Use `�
 
 Per the global `pdf.md` rule, read the rendered `splits/chNN/secMM/textbook.pdf` with the `Read` tool — check first page (does it begin where the section begins?) and last page (does it end at or after `习题 X.Y`?). Mention what you saw, not just "PDF generated successfully." If the boundary is off, re-slice.
 
-Also check the supplementary materials you produced: for a verbatim copy, open the destination to confirm it is the right file and not empty/truncated; for a transcription, spot-check it against the source so no information was dropped or garbled.
+Also check the supplementary materials you produced: for a verbatim copy, open the destination to confirm it is the right file and not empty/truncated; for a transcription, spot-check it against the source so no information was dropped or garbled. If you produced a `past_paper_problems.pdf`, open it to confirm the sliced pages are the right problems; if `.md`, spot-check each transcribed statement against the source page.
 
 ### 6. Hand off to `course-init-prompt`
 
@@ -136,7 +166,7 @@ Tell the user:
 - One sentence on what you saw on the first and last pages of the sliced textbook.
 - The destination folder.
 - Each supplementary material you brought in, and how you preserved it (copied whole / transcribed / excerpted) in a few words — or, if none, that you proceeded with textbook + assignment only. Note which (if any) you named with a `prior_` prefix as a prior-learning anchor.
-- Whether `exam_analysis.md` was consulted.
+- Whether `exam_analysis.md` was consulted, and for the past-paper step (3b): how many related problems you brought in and by which family (`直接 A 卷` vs `同源旁证`), in what form (transcribed / sliced), any matches dropped to stay under the cap — or that the index was absent / nothing mapped, so no `past_paper_problems` file was produced.
 - Anything you flagged for the project CLAUDE.md.
 - That `course-init-prompt` is the next step.
 
@@ -150,3 +180,4 @@ The user may ask for multiple sections in one go (e.g. "ch10 sec05 and sec06"). 
 - Do not generate placeholder or invented exercise text; if you can't read a page clearly, stop and tell the user.
 - Do not summarize or drop supplementary material to save space; if you are unsure how to preserve it, default to a verbatim whole copy.
 - Do not skip the visual audit — source-level correctness does not guarantee output-level correctness.
+- Do not invent past-paper problems or guess their family. Only include problems that exist in the 原题索引 and whose statement you actually read from the source page; carry the index's family tag through. Include the problem statement only, never its solution.

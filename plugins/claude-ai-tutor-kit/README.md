@@ -10,9 +10,9 @@ The workflow assumes you are studying a course through chat-interface Claude ses
 
 | Skill | When to run |
 |---|---|
-| `course-exam-distill` | **Once per course** (or after new exam papers are added). Reads everything under `materials/exam_papers/`, produces `materials/exam_analysis.md` with topic frequency, problem-type distribution, and a judgment call on high-leverage areas. |
-| `course-split-section` | **Once per section.** Slices the source textbook PDF to cover section body + 习题 X.Y, transcribes the assignment list, and preserves each supplementary material (notes, handouts) by a fidelity-first rubric — copied whole when scanned/handwritten/cross-referencing, transcribed when that aids grasp. Hands off to `course-init-prompt` as the next step (you run it separately). |
-| `course-init-prompt` | Run after `course-split-section` (a separate step, not auto-invoked). Drafts the Chinese `init_prompt.md`, has the claude.ai session connect new material to any attached prior-learning notes, and runs `writing:humanizer-zh` if the `writing` plugin is enabled in the project. |
+| `course-exam-distill` | **Once per course** (or after new exam papers are added). Reads everything under `materials/exam_papers/`, produces `materials/exam_analysis.md` with topic frequency, problem-type distribution, a judgment call on high-leverage areas, and a per-problem **原题索引** (paper · 题号 · page locator · section mapping · paper-family tag) that `course-split-section` reads to route problems into packets. |
+| `course-split-section` | **Once per section.** Slices the source textbook PDF to cover section body + 习题 X.Y, transcribes the assignment list, and preserves each supplementary material (notes, handouts) by a fidelity-first rubric — copied whole when scanned/handwritten/cross-referencing, transcribed when that aids grasp. When the 原题索引 exists, also pulls this section's related past-paper problems into `past_paper_problems.md`/`.pdf` (statements only, tagged by family). Hands off to `course-init-prompt` as the next step (you run it separately). |
+| `course-init-prompt` | Run after `course-split-section` (a separate step, not auto-invoked). Drafts the Chinese `init_prompt.md`, has the claude.ai session connect new material to any attached prior-learning notes, give **direct inline-quoted references** to any attached past-paper problems (tagged by family) at the matching teaching moment, and runs `writing:humanizer-zh` if the `writing` plugin is enabled in the project. |
 
 ## Default project layout
 
@@ -32,8 +32,10 @@ The workflow assumes you are studying a course through chat-interface Claude ses
         ├── textbook.pdf
         ├── assignment.md
         ├── init_prompt.md
-        └── official_notes_chNN.pdf         # 0..N supplementary files: .pdf = copied
-                                            #   whole, .md = transcribed
+        ├── official_notes_chNN.pdf         # 0..N supplementary files: .pdf = copied
+        │                                   #   whole, .md = transcribed
+        └── past_paper_problems.md          # optional: related past-exam problems
+                                            #   (statements, tagged by paper family)
 ```
 
 Alternate layouts are accepted. To override defaults, add a `## claude-ai-tutor-kit configuration` section to the project's `CLAUDE.md`:

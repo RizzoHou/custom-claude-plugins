@@ -6,8 +6,11 @@ description: |
   file (default `materials/exam_analysis.md`). The analysis tallies which
   chapters/sections/topics recur across years, common problem types per
   topic, and Claude's judgment of high-leverage areas to emphasize during
-  study. Run this ONCE per course (or whenever new papers are added);
-  per-section skills then read the analysis instead of re-reading every PDF.
+  study. It also writes a per-problem 原题索引 (paper, 题号, page locator,
+  section mapping, paper-family tag) that course-split-section reads to pull
+  related past-paper problems into each section packet. Run this ONCE per
+  course (or whenever new papers are added); per-section skills then read the
+  analysis instead of re-reading every PDF.
 allowed-tools:
   - Read
   - Write
@@ -35,7 +38,7 @@ If those default paths do not exist, grep the project's root `CLAUDE.md` for a `
 
 ## What you produce
 
-`materials/exam_analysis.md` (or `<materials_dir>/exam_analysis.md`). Single file. Overwrite freely on re-runs.
+`materials/exam_analysis.md` (or `<materials_dir>/exam_analysis.md`). Single file. Overwrite freely on re-runs. It carries two roles: the weight/judgment summary (read by `course-init-prompt` for a one-sentence signal) **and** a per-problem 原题索引 keyed by chapter/section (read by `course-split-section` to locate problems to pull into a packet). This file stays local — it is never uploaded to the claude.ai session.
 
 ## Procedure
 
@@ -49,6 +52,8 @@ If those default paths do not exist, grep the project's root `CLAUDE.md` for a `
    - Year, season, midterm/final, course code (e.g. `a2-2024-final`).
    - Problem types observed (filling blanks, computation, proof, applied).
    - Topics tested per problem, mapped to the textbook's chapter / section structure where possible. If unsure of mapping, write the topic in plain words and flag for review.
+   - **A per-problem locator** (this is new and load-bearing — `course-split-section` reads it to pull section-relevant problems into each study packet): for every problem, record the source PDF path, the question number, the page(s) the problem occupies in that PDF, a one-line gist of the statement, and a paper-family tag (`直接 A 卷` for the target family, `同源旁证` for sibling/B families). Do **not** transcribe the full statement here — a locator is enough; `course-split-section` transcribes or slices only the handful of problems for the section actually being studied, so the one-time distill cost stays low.
+   - **Map each problem to every section it would help, not one "home" section.** A problem usually draws on concepts from several sections — the section where a concept is *introduced* and the section where it is *applied*. Emit one index row per such section, so a student studying any of them finds the problem. The seam this fixes is real: an exam problem about 对偶基 may be *filed* under the chapter where dual bases are *used* (e.g. 双线性函数), but a student studying the section where 对偶基 is first *defined* must still get it. When unsure which sections a problem touches, err toward listing more — `course-split-section` caps the count downstream, so over-listing here is cheap and under-listing silently hides the problem from the section that needs it.
 
 5. **Aggregate.** Build a topic frequency table: rows = topics (or chapter/section labels), columns = years/papers, cells = how many problems hit that topic. Also tally problem-type distribution per chapter.
 
@@ -76,6 +81,18 @@ If those default paths do not exist, grep the project's root `CLAUDE.md` for a `
    | 章 | 节/主题 | 出现年份 | 常见题型 | 估计权重 |
    | --- | --- | --- | --- | --- |
    | 10 | §5 幂级数 | 2021、2023、2024 | 求收敛半径、求和函数 | 中等 |
+   | ... |
+
+   ## 原题索引（按章节）
+
+   <!-- course-split-section reads this to locate per-section problems. One row per (problem, section it helps). A problem touching several sections gets one row PER section — including where its concepts are introduced AND where they are applied — so it surfaces for whichever section the user studies. -->
+
+   | 章/节 | 试卷 | 题号 | 源文件 | 页码 | 一行题意 | 卷别 |
+   | --- | --- | --- | --- | --- | --- | --- |
+   | 10 §5 | a2-2024-final | 第3题 | exam_papers/spring_final/..._2024_final.pdf | 4 | 求幂级数收敛半径与和函数 | 直接 A 卷 |
+   | 10 §5 | b2-2023-final | 第6题 | exam_papers/spring_final/..._2023_final.pdf | 5 | 同型求和函数 | 同源旁证 |
+   | 9 §10 | a2-2024-final | 第6题 | exam_papers/spring_final/..._2024_final.pdf | 7 | 非退化双线性下对偶基存在性（对偶基概念在 9§10 引入，10§1 应用——两节都列） | 直接 A 卷 |
+   | 10 §1 | a2-2024-final | 第6题 | exam_papers/spring_final/..._2024_final.pdf | 7 | 同上，应用侧 | 直接 A 卷 |
    | ... |
 
    ## 高权重重点（建议优先掌握）
