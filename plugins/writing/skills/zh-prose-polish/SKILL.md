@@ -23,7 +23,7 @@ draft  →  consult-zh  →  humanizer-zh  →  de-AI-writing  →  final
          (argument)     (surface AI tells)   (二元对照, 路标词, 模板)
 ```
 
-1. **draft** — section-by-section, in the author's own voice. Don't pre-polish; let the next steps do their jobs.
+1. **draft** — section-by-section, in the author's own voice. Don't pre-polish; let the next steps do their jobs. For sourced essays/papers, the draft should arrive from `grounded-draft` (argument grown from a verified ledger) so cites are real before polish starts.
 2. **`consult-zh`** — argument critique + phrasing via DeepSeek in a draft+critique round. Fix structural and idiomatic issues *first*, before any cosmetic scrub. Multi-round via `--session` if needed.
 3. **`humanizer-zh`** — surface-level AI-trace scrub against the Wikipedia "Signs of AI writing" pattern set: 破折号 overuse, 三段式法则, 否定式排比, AI 高频词, 模糊归因, etc.
 4. **`de-AI-writing`** — author-voice retention pass against the good-writing 文风底座. Strips the 二元对照 template (`不是…而是`), 路标词 budget enforcement, 分析师讲解 cadence removal.

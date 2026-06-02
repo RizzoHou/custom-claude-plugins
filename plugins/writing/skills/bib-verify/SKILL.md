@@ -15,6 +15,8 @@ metadata:
 
 Citations are the highest-risk surface for LLM-assisted writing. The prose-polish pipeline does **not** verify them — that's this skill's job. Run it separately, after polish, before final delivery.
 
+This is the **hard gate**, not the only defense. `grounded-draft` works upstream to stop fabricated cites entering the draft at all (argument grown from a verified source ledger). When a draft came through `grounded-draft`, this skill's job narrows to clearing the `[retrieved · UNVERIFIED]` tier and confirming claim-fidelity against the ledger notes; when it didn't, run the full per-entry procedure below. Either way, do not skip this gate — grounding is soft-enforced and does not make verification optional.
+
 ## Why bibliography fabrication slips through
 
 Polished prose looks authoritative. Plausible-sounding citations look authoritative. Both can be wrong in ways that pass a casual read but fail when someone tries to fetch the source. Common patterns:

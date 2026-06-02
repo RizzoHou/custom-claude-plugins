@@ -8,6 +8,7 @@ Academic writing toolkit for Claude Code, Chinese-first.
 
 | Skill | Purpose |
 |---|---|
+| `grounded-draft` | Source-grounded drafting: grow the argument from a verified source ledger (co-evolving loop), cite only ledger IDs, flag unsupported claims instead of fabricating. Front of the pipeline; hands off to `zh-prose-polish` then `bib-verify`. |
 | `consult-zh` | Route native Chinese drafting/critique to DeepSeek via the `consultant` CLI in a draft+critique flow. |
 | `de-AI-writing` | Strip AI-template traces from Chinese prose while preserving the author's voice. |
 | `humanizer-zh` | Detect and rewrite generic AI-writing patterns (破折号 over-use, 三段式, 否定式排比, etc.). |

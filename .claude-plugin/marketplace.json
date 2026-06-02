@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "writing",
-      "description": "Academic writing toolkit (Chinese-first): native Chinese drafting via DeepSeek, AI-trace scrubbing, structural humanizer, CJK LaTeX/xeCJK build + visual audit, bibliography authenticity check, locked polish pipeline, and a PKU paper template.",
+      "description": "Academic writing toolkit (Chinese-first): source-grounded drafting that stops fabricated citations, native Chinese drafting via DeepSeek, AI-trace scrubbing, structural humanizer, CJK LaTeX/xeCJK build + visual audit, bibliography authenticity check, locked polish pipeline, and a PKU paper template.",
       "category": "writing",
       "source": "./plugins/writing"
     },

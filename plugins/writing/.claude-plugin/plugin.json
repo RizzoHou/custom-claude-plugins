@@ -1,7 +1,7 @@
 {
   "name": "writing",
-  "description": "Academic writing toolkit (Chinese-first): native Chinese drafting via DeepSeek (consult-zh), AI-trace scrubbing (de-AI-writing, humanizer-zh), CJK LaTeX/xeCJK build + visual audit (latex-cjk-pdf, pdf-audit), bibliography authenticity check (bib-verify), and a locked polish pipeline (zh-prose-polish). Ships a PKU paper LaTeX template.",
-  "version": "0.1.0",
+  "description": "Academic writing toolkit (Chinese-first): source-grounded drafting that stops fabricated citations (grounded-draft), native Chinese drafting via DeepSeek (consult-zh), AI-trace scrubbing (de-AI-writing, humanizer-zh), CJK LaTeX/xeCJK build + visual audit (latex-cjk-pdf, pdf-audit), bibliography authenticity check (bib-verify), and a locked polish pipeline (zh-prose-polish). Ships a PKU paper LaTeX template.",
+  "version": "0.2.0",
   "author": {
     "name": "RizzoHou"
   }
