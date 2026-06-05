@@ -45,10 +45,14 @@ wc -m CLAUDE.md  # character count (use -m, not -c, for multi-byte safety)
 - **Under 39k:** proceed normally. Additions are allowed if they add real value.
 - **At or over 39k:** the file is **over budget**. Do **not** add new content without first removing equal-or-greater content. Pruning takes priority over additions this run. Surface the overage at the top of the quality report.
 
-When pruning to fit the budget, prefer in this order:
+When pruning to fit the budget, prefer in this order. CLAUDE.md is git-tracked, so deleted bytes survive in `git log -p CLAUDE.md` — what you protect isn't the bytes, it's a future session's ability to *reach* still-relevant content without paying for it in every-session context.
+
 1. **Consolidate** — merge overlapping sections, collapse redundant examples.
-2. **Compress** — replace verbose explanations with one-liners; drop filler prose.
-3. **Delete** — remove stale commands, obsolete architecture notes, one-off fix recipes, and anything already obvious from the code or git history.
+2. **Compress** — replace verbose explanations with one-liners; drop filler prose. Use for content that must fire every session (a hard convention) — relocating it would break it.
+3. **Relocate with a pointer** — for content that's correct and prescriptive but only matters when touching a specific subsystem: move the detail to a linked doc and leave a one-line pointer in CLAUDE.md (`See docs/x.md for …`). The pointer stays always-loaded (deterministic); the body loads on demand — the same progressive-disclosure pattern as this skill's own `references/` files. Targets:
+   - **A linked `.md` in the repo** (`docs/`, `CONTRIBUTING.md`, a dedicated note) — the default; portable to any project.
+   - **Claude's project memory** — only for *episodic/factual* content that decays (current state, "mid-migration to Y"), and only when the project already uses the memory system. Never relocate a convention here: memory recall is probabilistic, and a convention that doesn't fire is broken.
+4. **Delete** — stale commands, obsolete architecture notes, one-off fix recipes, anything already obvious from code or git history. Loss is the goal; git retains it if ever needed.
 
 Record the pre-update size; you will re-check it in Phase 5.
 
