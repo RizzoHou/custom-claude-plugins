@@ -12,7 +12,10 @@ description: |
   When a past_paper_problems file is attached, instructs the session to give
   direct, inline-quoted references to those past-exam problems (tagged by
   paper family) at the matching teaching moment, instead of vague "常考点".
-  Then runs writing:humanizer-zh on the draft if the
+  Folds in the user's durable teaching-style preferences from
+  references/teaching-style.md (learn-from-explanation stance, motivation-first,
+  efficient≠skipping, weave past papers into matching rounds, claude.ai
+  rendering rules). Then runs writing:humanizer-zh on the draft if the
   writing plugin is enabled. Functional instructions, not literary prose —
   do not run the full zh-prose-polish pipeline.
 allowed-tools:
@@ -28,7 +31,9 @@ metadata:
 
 # course-init-prompt
 
-You write the first message the user will paste into a new claude.ai session, alongside the section's attachments (textbook, assignment, and any supplementary materials). The prompt is in Chinese, ~30–40 lines, functional rather than literary.
+You write the first message the user will paste into a new claude.ai session, alongside the section's attachments (textbook, assignment, and any supplementary materials). The prompt is in Chinese, functional rather than literary. Its length is whatever it takes to state the user's demands **accurately** — describing what he wants is the whole purpose of this file, so do not truncate real requirements to hit a length target. (Equally, do not pad: no throat-clearing, no restating the same instruction in three places.)
+
+**Before drafting, read [references/teaching-style.md](references/teaching-style.md).** It holds the durable teaching-style preferences the user has converged on across a semester of packets — the substance of the "User's goal" and "Preferred teaching style" sections below, plus canonical Chinese phrasings to reuse. Those preferences are the part he cares about most; this SKILL owns the structure, the reference owns what goes inside it.
 
 ## Inputs
 
@@ -43,7 +48,7 @@ Optionally, at the project root: `materials/exam_analysis.md` (produced by `cour
 
 ## Output
 
-`splits/chNN/secMM/init_prompt.md`, Chinese, ~30–40 lines.
+`splits/chNN/secMM/init_prompt.md`, Chinese. As long as it needs to be to state the demands accurately — no line-count target.
 
 ## Required structure
 
@@ -57,11 +62,14 @@ Optionally, at the project root: `materials/exam_analysis.md` (produced by `cour
 
 3. **Course context** — one short paragraph: this section's place in the chapter's overall framework, dependencies on prior sections, and (if `exam_analysis.md` exists) one sentence on how heavily this section is tested in past papers. Do not over-claim from a thin sample.
 
-4. **User's goal** — explicit statement: master the section and complete the assignment in under 1 hour, simplest solutions, no over-elaboration.
+4. **User's goal** — master the section and complete the assignment in roughly 1 hour, simplest solutions, no over-elaboration. **Always pair this with the explicit caveat that "高效/efficient" does NOT mean skipping the explanation** — motivation, definitions, and key derivations cannot be skipped; what "efficient" prunes is off-syllabus generalization and tangents, not the explanatory spine. The user values this caveat most and has restated it packet after packet; "最简解法" alone has misfired on him. (See references/teaching-style.md → "The core stance".)
 
-5. **Preferred teaching style** — top-down, two phases:
-   - Phase 1: one or two paragraphs of the section's main thread (骨架). If a prior-learning anchor file is attached (see "Connecting to prior learning"), close Phase 1 by hooking the skeleton onto the relevant concept(s) already in those notes — e.g. "本节的核心 X 建立在你笔记里已有的 Y 之上".
-   - Phase 2: drill into details across multiple rounds, with one or two examples per round. When a detail depends on, extends, or contrasts with something in the attached notes, say so and point at the specific concept — not a generic "回顾一下旧知识". When `past_paper_problems` is attached, add the past-paper-reference requirement (see "Past-paper references"): for any round whose topic matches a listed problem, quote that problem inline and tag its family — not a vague "这是常考点".
+5. **Preferred teaching style** — top-down, two phases, carrying the texture in references/teaching-style.md → "The standard teaching-style block". The user learns *primarily from the assistant's explanation*, using the textbook only to check details, so the theory must be taught until he can derive the next step himself, not dumped as conclusions and unseen symbols.
+   - Phase 1: one or two paragraphs of the section's main thread (骨架), built **motivation-first** (what problem each concept solves / which learned theory it extends, *then* the definition — never open with the bare abstract definition or a cold symbol). If a prior-learning anchor is attached (see "Connecting to prior learning"), close Phase 1 by hooking the skeleton onto the relevant named concept(s) already in those notes/cheatsheets.
+   - Phase 2: drill into details across multiple rounds, one or two examples per round, **stopping after each round to check the depth/pace before continuing** (don't cram a round into one message). Unpack every symbol on first use and derive key results in place; build bottom-up from what the user can compute, citing textbook **page numbers**. When a detail depends on, extends, or contrasts with something in the attached notes, name the specific concept — not a generic "回顾一下旧知识". Decide each topic's depth by **exam weight and knowledge structure, not by whether it was assigned as homework** (a no-homework section can still be a heavy exam topic — teach it fully). When `past_paper_problems` is attached, **weave each problem into the round whose topic it matches and drill it there — never pile all the problems at the end** (an explicit correction the user made); quote the statement inline and tag its family (see "Past-paper references"), not a vague "这是常考点".
+   - Add a **rendering-rules** line so the LaTeX renders on claude.ai (no `·`/`\cdot` inside `\text{}`, no `•`, and `\lvert\rvert`/`\lVert\rVert` instead of bare `|` in markdown tables) and a **closing one-sentence through-line** for pre-exam recall. Both are in references/teaching-style.md.
+
+   For an **exam-review / drill packet** rather than a learn-a-new-section packet (e.g. a finalterm or notes-drill folder), swap in the review-mode rhythm from references/teaching-style.md → "Review / drill mode" (answer-check first each round, surface the method behind every drilled problem, treat abstract language as real content).
 
 6. **Explicit ask before the assignment**: before tackling the assignment, the assistant should **map each `assignment.md` problem to its corresponding textbook exercise text** and tag the knowledge point each one tests. This catches mis-mapping early.
 
@@ -111,7 +119,9 @@ Attaching the user's own notes exists to anchor *new* material to what they have
 1. **Only when a prior-learning anchor is attached.** `course-split-section` names such files with a `prior_` prefix, from a `supplementary_material` config entry the user tagged as a prior-learning anchor. If no `prior_`-prefixed file is in the folder, omit all connect-to-prior wording — do not invent an anchor, and do not treat the current section's official notes as prior learning.
 2. **Grounded to the attached notes only.** The claude.ai session is stateless: it remembers nothing from earlier sessions and sees only this section's attachments. Instruct it to connect to "我上传的笔记里已有的概念", not to "我学过的一切" — telling it to connect to an unattached history invites confabulation about what the user knows. If a connection needs a concept not in the attached notes, the session should say so rather than assume it.
 
-When the condition holds, weave the connection into the teaching style (item 5): Phase 1 hooks the skeleton onto a named prior concept, Phase 2 flags dependencies / extensions / contrasts per detail round. Do not bolt it on as a separate "现在复习旧知识" step.
+When the condition holds, weave the connection into the teaching style (item 5): Phase 1 hooks the skeleton onto a named prior concept, Phase 2 flags dependencies / extensions / contrasts per detail round. Do not bolt it on as a separate "现在复习旧知识" step. Spell out the concrete bridges (the recent packets name 3–4, e.g. "多重线性映射在 $r=2$ 时就是 §10.1 的双线性函数") — named hooks beat a generic "回顾旧知识".
+
+**The anchor materials increasingly live in claude.ai *project files*, not only per-message attachments** — the user uploads prior chapters' notes *and the cheatsheets / learning outputs from earlier packets* (e.g. `高代A2_Packet2_考前速查.pdf`) to the conversation's 项目文件. When that is the setup, phrase the instruction around "我已上传文件 / 项目文件里确实有的概念", tell the session to **open those files** while teaching, and keep the same grounding guardrail (connect only to what is actually uploaded; if a needed concept isn't there, say so). See references/teaching-style.md → "Connecting to prior learning".
 
 ## What you do NOT do
 
@@ -119,7 +129,8 @@ When the condition holds, weave the connection into the teaching style (item 5):
 - Do not tell the session to connect to prior knowledge that isn't in the attached `prior_` notes — grounded connections only, or it will confabulate the user's background.
 - Do not point the session at `exam_analysis.md` (never uploaded) or instruct past-paper references when no `past_paper_problems` file is attached — same confabulation risk, applied to exam history.
 - Do not over-promise ("一小时内一定能掌握" is fragile — the user already says "目标 1 小时", keep it as a goal, not a guarantee).
-- Do not produce a 100-line prompt. 30–40 lines is the target.
+- Do not pad: no throat-clearing, no restating the same instruction in three places. But do not truncate real requirements to hit a length either — there is no line-count target, and stating the user's demands accurately is the whole point of this file.
+- Do not read "最简解法 / 高效" as license to skip the explanation — always carry the "efficient ≠ skipping motivation/definitions/derivations" caveat.
 
 ## Report
 
