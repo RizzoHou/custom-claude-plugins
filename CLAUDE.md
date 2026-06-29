@@ -9,6 +9,7 @@ Personal marketplace of Claude Code plugins, opt-in per project. Public repo at 
 plugins/<name>/
   .claude-plugin/plugin.json        # plugin manifest
   skills/<skill>/SKILL.md           # one dir per skill, frontmatter + body
+  skills/<skill>/references/*.md     # optional: bulky skill detail, loaded on demand
   templates/<template>/             # optional bundled templates
   README.md
 ```
@@ -22,6 +23,7 @@ Marketplace `source` entries are relative: `"source": "./plugins/<name>"`.
 - **Templates: PII gets `\newcommand` placeholders, not deletion.** When bundling a real-world LaTeX template, replace identifying fields with `\newcommand{\studentName}{...}` style placeholders so users fill in once and the value propagates.
 - **Bundled third-party content (reference files, samples, style anchors) requires explicit redistribution review before pushing**, since this repo is public. The `writing` plugin's `de-AI-writing/references/{writing-samples,style-dna}.md` ship quoted prose from published essays — that decision was made consciously this session, not by default. Future skills bundling third-party content: ask the user before publishing.
 - **Promoting a global skill into a plugin means deleting the global copy.** Global skills live in `~/projects/claude-code-config/skills/` (symlinked to `~/.claude/skills/`) and load unconditionally in every project — leaving a copy there preempts the plugin and defeats per-project opt-in. After packaging a skill under `plugins/<name>/skills/`, remove the matching directory from the config repo and commit.
+- **Offload bulky skill detail into `skills/<skill>/references/<topic>.md`, not the SKILL.md body.** When a skill accumulates a large block of durable guidance (rubrics, style preferences, canonical phrasings), put it in a sibling `references/` file and leave a one-line pointer in SKILL.md (`See references/<topic>.md`) — progressive disclosure: the pointer is always loaded, the body loads on demand. Reference it by relative path. Used by `claude-md-management`, `writing`, and `claude-ai-tutor-kit` (`course-init-prompt/references/teaching-style.md`).
 - **Forking an upstream plugin is fine but document the delta.** When copying a plugin from another marketplace (e.g. `claude-plugins-official`) into `plugins/<name>/`: keep the original `LICENSE`, attribute the upstream source in the plugin's README, and call out in one sentence what the fork changes (default behavior, prompts, allowed tools). Mention the fork + delta in this repo's top-level `README.md` plugin list too. Once the fork is installed via `/plugin install <name>@custom-claude-plugins` and enabled in a project, the upstream copy can be removed via `/plugin uninstall <name>@<original-marketplace>`. Don't silently diverge — future sessions need to know whether to rebase from upstream or treat the fork as source of truth.
 
 ## Adding a new plugin
